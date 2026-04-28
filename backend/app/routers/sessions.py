@@ -1,15 +1,24 @@
 """Ендпоїнти для навчальних сесій."""
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Path, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies import get_current_user
 from app.models import LearningSession, SessionTask, Task, User
-from app.schemas import SessionStart, SessionStartResponse, TaskOut
+from app.schemas import (
+    AnswerResponse,
+    AnswerSubmit,
+    SessionStart,
+    SessionStartResponse,
+    SessionStats,
+    TaskOut,
+)
+from app.services.analyzer import analyze_session
 from app.services.optimizer import solve_knapsack, total_value, total_weight
 from app.services.task_pool import build_pool
+from app.services.user_model import update_after_answer
 
 router = APIRouter(prefix="/sessions", tags=["sessions"])
 
@@ -72,3 +81,93 @@ def start_session(
         total_utility=round(total_value(pool, selected_ids), 4),
         tasks=[TaskOut.model_validate(t) for t in selected_tasks],
     )
+
+@router.post("/{session_id}/answer", response_model=AnswerResponse)
+def submit_answer(
+    payload: AnswerSubmit,
+    session_id: int = Path(..., ge=1),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    # Перевіряємо, що сесія існує та належить користувачу
+    session = db.query(LearningSession).filter_by(id=session_id).first()
+    if session is None or session.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Сесію не знайдено")
+    if session.finished_at is not None:
+        raise HTTPException(status_code=400, detail="Сесія вже завершена")
+
+    # Знаходимо запис session_task
+    st = (
+        db.query(SessionTask)
+        .filter_by(session_id=session_id, task_id=payload.task_id)
+        .first()
+    )
+    if st is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Це завдання не входить у поточну сесію",
+        )
+    if st.is_correct is not None:
+        raise HTTPException(
+            status_code=400,
+            detail="На це завдання вже надано відповідь",
+        )
+
+    # Перевіряємо правильність
+    task = db.query(Task).get(payload.task_id)
+    is_correct = (
+        payload.answer.strip().lower() == task.correct_answer.strip().lower()
+    )
+
+    # Записуємо відповідь
+    st.user_answer = payload.answer
+    st.is_correct = is_correct
+    st.time_spent_seconds = payload.time_spent_seconds
+    st.answered_at = datetime.now(timezone.utc)
+    db.commit()
+
+    # Оновлюємо модель знань (BKT)
+    update_after_answer(
+        db,
+        user_id=current_user.id,
+        task_id=payload.task_id,
+        is_correct=is_correct,
+    )
+
+    return AnswerResponse(
+        task_id=payload.task_id,
+        is_correct=is_correct,
+        submitted_answer=payload.answer,
+        time_spent_seconds=payload.time_spent_seconds,
+    )
+
+
+@router.post("/{session_id}/finish", response_model=SessionStats)
+def finish_session(
+    session_id: int = Path(..., ge=1),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    session = db.query(LearningSession).filter_by(id=session_id).first()
+    if session is None or session.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Сесію не знайдено")
+    if session.finished_at is None:
+        session.finished_at = datetime.now(timezone.utc)
+        db.commit()
+
+    stats = analyze_session(db, session_id)
+    return SessionStats(**stats)
+
+
+@router.get("/{session_id}/stats", response_model=SessionStats)
+def get_session_stats(
+    session_id: int = Path(..., ge=1),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    session = db.query(LearningSession).filter_by(id=session_id).first()
+    if session is None or session.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Сесію не знайдено")
+
+    stats = analyze_session(db, session_id)
+    return SessionStats(**stats)

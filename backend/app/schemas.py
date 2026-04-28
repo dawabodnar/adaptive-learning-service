@@ -55,3 +55,35 @@ class SessionStartResponse(BaseModel):
     total_estimated_seconds: int
     total_utility: float
     tasks: list[TaskOut]
+
+class AnswerSubmit(BaseModel):
+    task_id: int
+    answer: str
+    time_spent_seconds: int = Field(ge=0, le=3600)
+
+
+class AnswerResponse(BaseModel):
+    task_id: int
+    is_correct: bool
+    submitted_answer: str
+    time_spent_seconds: int
+
+
+class ConceptStats(BaseModel):
+    concept_id: int
+    concept_name: str
+    tasks_count: int
+    correct_count: int
+    accuracy: float
+
+
+class SessionStats(BaseModel):
+    session_id: int
+    total_tasks: int
+    answered: int
+    correct: int
+    accuracy: float
+    total_time_spent: int
+    avg_time_per_task: float
+    by_concept: list[ConceptStats]
+    weak_concepts: list[ConceptStats]
