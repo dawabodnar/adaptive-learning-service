@@ -6,7 +6,7 @@ from app.database import Base, engine
 from app import models
 from app.dependencies import get_current_user
 from app.models import User
-from app.routers import auth
+from app.routers import auth, sessions
 from app.schemas import UserOut
 
 
@@ -19,6 +19,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Adaptive Learning Service", lifespan=lifespan)
 
 app.include_router(auth.router)
+app.include_router(sessions.router)
 
 
 @app.get("/health")
