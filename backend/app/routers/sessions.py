@@ -171,3 +171,53 @@ def get_session_stats(
 
     stats = analyze_session(db, session_id)
     return SessionStats(**stats)
+@router.get("/suggested-budget")
+def get_suggested_budget(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Розумний підбір бюджету часу:
+    - якщо є історія завершених сесій — середня тривалість;
+    - якщо ні — типове значення 30 хв.
+    """
+    sessions = (
+        db.query(LearningSession)
+        .filter(LearningSession.user_id == current_user.id)
+        .filter(LearningSession.finished_at.isnot(None))
+        .order_by(LearningSession.started_at.desc())
+        .limit(10)
+        .all()
+    )
+
+    if not sessions:
+        return {
+            "time_budget_seconds": 1800,
+            "source": "default",
+            "explanation": "Це твоя перша сесія — використовуємо стандартне значення 30 хв.",
+            "based_on_sessions": 0,
+        }
+
+    # Обчислюємо середню реальну тривалість сесій
+    durations = []
+    for s in sessions:
+        if s.finished_at and s.started_at:
+            delta = (s.finished_at - s.started_at).total_seconds()
+            if 60 < delta < 7200:  # відкидаємо аномалії
+                durations.append(delta)
+
+    if durations:
+        avg = sum(durations) / len(durations)
+    else:
+        avg = sessions[0].time_budget_seconds
+
+    # Округлення до 5 хв та обмеження
+    rounded = round(avg / 300) * 300
+    rounded = max(300, min(7200, rounded))
+
+    return {
+        "time_budget_seconds": int(rounded),
+        "source": "history",
+        "explanation": f"На основі {len(sessions)} попередніх сесій.",
+        "based_on_sessions": len(sessions),
+    }
