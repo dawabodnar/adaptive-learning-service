@@ -26,9 +26,18 @@ export function Login() {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       });
 
-      localStorage.setItem('access_token', data.access_token);
-      setUser(data.user);
-      navigate('/dashboard');
+localStorage.setItem('access_token', data.access_token);
+setUser(data.user);
+// Переадресація залежно від ролі
+if (data.user.role === 'teacher') {
+  navigate('/teacher');
+} else if (data.user.role === 'db_admin') {
+  navigate('/admin/db');
+} else if (data.user.role === 'system_admin') {
+  navigate('/admin/users');
+} else {
+  navigate('/dashboard');
+}
     } catch (err) {
       setError(err.response?.data?.detail ?? 'Помилка входу');
     } finally {

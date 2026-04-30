@@ -1,0 +1,127 @@
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 32px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 20px 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.logoutBtn {
+  padding: 8px 16px;
+  background: transparent;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.logoutBtn:hover {
+  background: #f3f4f6;
+}
+
+.card {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.cardTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 16px;
+}
+
+.empty {
+  color: #9ca3af;
+  font-size: 14px;
+  text-align: center;
+  padding: 30px 0;
+}
+
+.studentList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.studentRow {
+  background: #f9fafb;
+  padding: 14px 18px;
+  border-radius: 10px;
+}
+
+.studentHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.studentName {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+.studentStats {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.bar {
+  height: 5px;
+  background: #e5e7eb;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.fillHigh {
+  height: 100%;
+  background: #4f46e5;
+}
+
+.fillLow {
+  height: 100%;
+  background: #ef4444;
+}
+
+.weakLine {
+  font-size: 11px;
+  color: #dc2626;
+  margin-top: 6px;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-size: 14px;
+  color: #6b7280;
+}
