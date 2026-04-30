@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
+import { useAuthStore } from '../store/authStore';
 import styles from './Register.module.css';
 
 export function Register() {
   const navigate = useNavigate();
+  const setUser = useAuthStore((s) => s.setUser);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
@@ -17,6 +19,7 @@ export function Register() {
     setLoading(true);
 
     try {
+      // 1. Реєструємо
       await api.post('/auth/register', {
         email,
         password,
@@ -24,7 +27,20 @@ export function Register() {
         role: 'student',
       });
 
-      navigate('/login');
+      // 2. Одразу логінимось
+      const formData = new URLSearchParams();
+      formData.append('username', email);
+      formData.append('password', password);
+
+      const { data } = await api.post('/auth/login', formData, {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      });
+
+      localStorage.setItem('access_token', data.access_token);
+      setUser(data.user);
+
+      // 3. Веде на діагностику
+      navigate('/diagnostic');
     } catch (err) {
       setError(err.response?.data?.detail ?? 'Помилка реєстрації');
     } finally {

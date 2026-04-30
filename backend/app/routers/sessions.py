@@ -221,3 +221,55 @@ def get_suggested_budget(
         "explanation": f"На основі {len(sessions)} попередніх сесій.",
         "based_on_sessions": len(sessions),
     }
+@router.get("/my-history")
+def get_my_history(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Список сесій користувача з підсумковими метриками."""
+    sessions = (
+        db.query(LearningSession)
+        .filter(LearningSession.user_id == current_user.id)
+        .order_by(LearningSession.started_at.desc())
+        .limit(50)
+        .all()
+    )
+
+    history = []
+    total_tasks = 0
+    total_correct = 0
+    total_seconds = 0
+
+    for s in sessions:
+        st_rows = db.query(SessionTask).filter_by(session_id=s.id).all()
+        answered = [r for r in st_rows if r.is_correct is not None]
+        correct = sum(1 for r in answered if r.is_correct)
+        accuracy = round(correct / len(answered), 4) if answered else 0.0
+        time_spent = sum(r.time_spent_seconds or 0 for r in answered)
+
+        history.append({
+            "session_id": s.id,
+            "started_at": s.started_at.isoformat() if s.started_at else None,
+            "finished_at": s.finished_at.isoformat() if s.finished_at else None,
+            "time_budget_seconds": s.time_budget_seconds,
+            "total_tasks": len(st_rows),
+            "answered": len(answered),
+            "correct": correct,
+            "accuracy": accuracy,
+            "time_spent_seconds": time_spent,
+            "is_finished": s.finished_at is not None,
+        })
+
+        total_tasks += len(answered)
+        total_correct += correct
+        total_seconds += time_spent
+
+    overall_accuracy = round(total_correct / total_tasks, 4) if total_tasks > 0 else 0.0
+
+    return {
+        "total_sessions": len(history),
+        "total_tasks_answered": total_tasks,
+        "overall_accuracy": overall_accuracy,
+        "total_time_spent_seconds": total_seconds,
+        "sessions": history,
+    }
