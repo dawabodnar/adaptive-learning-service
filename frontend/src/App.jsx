@@ -7,6 +7,7 @@ import { Results } from './pages/Results';
 import { Profile } from './pages/Profile';
 import { Diagnostic } from './pages/Diagnostic';
 import { TeacherDashboard } from './pages/TeacherDashboard';
+import { DbAdminDashboard } from './pages/DbAdminDashboard';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/results/:sessionId" element={<Results />} />
         <Route path="/teacher" element={<TeacherDashboard />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="/admin/db" element={<DbAdminDashboard />} />
       </Routes>
     </BrowserRouter>
   );

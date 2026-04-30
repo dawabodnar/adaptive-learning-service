@@ -7,7 +7,7 @@ from app.database import Base, engine
 from app import models
 from app.dependencies import get_current_user
 from app.models import User
-from app.routers import auth, sessions, teacher
+from app.routers import admin_db, auth, sessions, teacher
 from app.schemas import UserOut
 
 
@@ -30,6 +30,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(sessions.router)
 app.include_router(teacher.router)
+app.include_router(admin_db.router)
 
 @app.get("/health")
 def health_check():
