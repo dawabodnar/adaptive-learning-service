@@ -83,6 +83,9 @@ if (data.user.role === 'teacher') {
         <p className={styles.linkRow}>
           Немає акаунту? <Link to="/register">Зареєструватись</Link>
         </p>
+        <p className={styles.linkRow}>
+  Або <Link to="/guest">спробуй без реєстрації</Link>
+</p>
       </form>
     </div>
   );

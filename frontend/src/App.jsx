@@ -8,6 +8,8 @@ import { Profile } from './pages/Profile';
 import { Diagnostic } from './pages/Diagnostic';
 import { TeacherDashboard } from './pages/TeacherDashboard';
 import { DbAdminDashboard } from './pages/DbAdminDashboard';
+import { SystemAdminDashboard } from './pages/SystemAdminDashboard';
+import { Guest } from './pages/Guest';
 
 function App() {
   return (
@@ -23,6 +25,8 @@ function App() {
         <Route path="/teacher" element={<TeacherDashboard />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
         <Route path="/admin/db" element={<DbAdminDashboard />} />
+        <Route path="/admin/users" element={<SystemAdminDashboard />} />
+        <Route path="/guest" element={<Guest />} />
       </Routes>
     </BrowserRouter>
   );

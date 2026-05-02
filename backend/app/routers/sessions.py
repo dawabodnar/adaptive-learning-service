@@ -273,3 +273,26 @@ def get_my_history(
         "total_time_spent_seconds": total_seconds,
         "sessions": history,
     }
+@router.get("/guest/sample-tasks")
+def get_guest_sample_tasks(db: Session = Depends(get_db)):
+    """Повертає 3 випадкові простіші завдання для демонстрації — без авторизації."""
+    from sqlalchemy import func
+
+    tasks = (
+        db.query(Task)
+        .filter(Task.is_active == True)
+        .filter(Task.difficulty < 0.5)  # простіші
+        .order_by(func.random())
+        .limit(3)
+        .all()
+    )
+
+    return [
+        {
+            "id": t.id,
+            "content": t.content,
+            "correct_answer": t.correct_answer,
+            "estimated_time_seconds": t.estimated_time_seconds,
+        }
+        for t in tasks
+    ]
