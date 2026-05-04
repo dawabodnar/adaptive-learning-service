@@ -288,11 +288,12 @@ def get_guest_sample_tasks(db: Session = Depends(get_db)):
     )
 
     return [
-        {
-            "id": t.id,
-            "content": t.content,
-            "correct_answer": t.correct_answer,
-            "estimated_time_seconds": t.estimated_time_seconds,
-        }
-        for t in tasks
-    ]
+    {
+        "id": t.id,
+        "content": t.content,
+        "correct_answer": t.correct_answer,
+        "estimated_time_seconds": t.estimated_time_seconds,
+        "answer_type": t.answer_type,
+    }
+    for t in tasks
+]

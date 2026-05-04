@@ -53,6 +53,7 @@ class Task(Base):
     discrimination = Column(Float, default=1.0)
     guessing = Column(Float, default=0.25)
     estimated_time_seconds = Column(Integer, default=60)
+    answer_type = Column(String(20), nullable=False, default="text")  
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 

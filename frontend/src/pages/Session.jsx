@@ -81,17 +81,29 @@ export function Session() {
           Орієнтовний час: {currentTask.estimated_time_seconds} с
         </p>
 
-        <input
-          type="text"
-          value={answer}
-          onChange={(e) => setAnswer(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && !loading) handleSubmitAnswer();
-          }}
-          className={styles.input}
-          placeholder="Введіть відповідь"
-          autoFocus
-        />
+<input
+  type="text"
+  value={answer}
+  onChange={(e) => {
+    const value = e.target.value;
+    if (currentTask.answer_type === 'number') {
+      const filtered = value.replace(/[^0-9\-.,]/g, '');
+      setAnswer(filtered);
+    } else {
+      setAnswer(value);
+    }
+  }}
+  onKeyDown={(e) => {
+    if (e.key === 'Enter' && !loading) handleSubmitAnswer();
+  }}
+  className={styles.input}
+  placeholder={
+    currentTask.answer_type === 'number'
+      ? 'Введіть число'
+      : 'Введіть відповідь'
+  }
+  autoFocus
+/>
 
         <button
           onClick={handleSubmitAnswer}

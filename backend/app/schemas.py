@@ -44,6 +44,7 @@ class TaskOut(BaseModel):
     id: int
     content: str
     estimated_time_seconds: int
+    answer_type: str = "text"
 
     class Config:
         from_attributes = True

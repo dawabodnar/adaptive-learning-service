@@ -129,6 +129,7 @@ function TaskForm({ concepts, onCreated }) {
   const [conceptId, setConceptId] = useState(concepts[0]?.id ?? '');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+  const [answerType, setAnswerType] = useState('text');
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -142,6 +143,7 @@ function TaskForm({ concepts, onCreated }) {
         discrimination: 1.0,
         guessing: 0.25,
         estimated_time_seconds: Number(time),
+        answer_type: answerType,
         concepts: conceptId ? [{ concept_id: Number(conceptId), weight: 1.0 }] : [],
       });
       setContent('');
@@ -195,6 +197,20 @@ function TaskForm({ concepts, onCreated }) {
           </select>
         </label>
       </div>
+
+      <div className={styles.formRow}>
+  <label className={styles.label}>
+    Тип відповіді
+    <select
+      value={answerType}
+      onChange={(e) => setAnswerType(e.target.value)}
+      className={styles.input}
+    >
+      <option value="text">Текст</option>
+      <option value="number">Число</option>
+    </select>
+  </label>
+</div>
 
       <div className={styles.formRow}>
         <label className={styles.label}>

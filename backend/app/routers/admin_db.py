@@ -26,6 +26,7 @@ class TaskCreate(BaseModel):
     discrimination: float = 1.0
     guessing: float = 0.25
     estimated_time_seconds: int = Field(ge=10, le=3600, default=60)
+    answer_type: str = Field(default="text", pattern="^(text|number)$")
     concepts: list[TaskConceptIn] = []
 
 
@@ -36,6 +37,7 @@ class TaskUpdate(BaseModel):
     discrimination: Optional[float] = None
     guessing: Optional[float] = None
     estimated_time_seconds: Optional[int] = None
+    answer_type: Optional[str] = None
     is_active: Optional[bool] = None
 
 
@@ -47,6 +49,7 @@ class TaskOut(BaseModel):
     discrimination: float
     guessing: float
     estimated_time_seconds: int
+    answer_type: str
     is_active: bool
     concept_ids: list[int]
     concept_names: list[str]
@@ -96,6 +99,7 @@ def list_tasks(
             discrimination=t.discrimination,
             guessing=t.guessing,
             estimated_time_seconds=t.estimated_time_seconds,
+            answer_type=t.answer_type,
             is_active=t.is_active,
             concept_ids=concept_ids,
             concept_names=concept_names,
@@ -125,6 +129,7 @@ def create_task(
         discrimination=payload.discrimination,
         guessing=payload.guessing,
         estimated_time_seconds=payload.estimated_time_seconds,
+        answer_type=payload.answer_type,
         is_active=True,
         created_at=datetime.now(timezone.utc),
     )
@@ -151,6 +156,7 @@ def create_task(
         discrimination=task.discrimination,
         guessing=task.guessing,
         estimated_time_seconds=task.estimated_time_seconds,
+        answer_type=task.answer_type,
         is_active=task.is_active,
         concept_ids=[c.concept_id for c in payload.concepts],
         concept_names=concept_names,
@@ -189,6 +195,7 @@ def update_task(
         discrimination=task.discrimination,
         guessing=task.guessing,
         estimated_time_seconds=task.estimated_time_seconds,
+        answer_type=task.answer_type,
         is_active=task.is_active,
         concept_ids=[tc.concept_id for tc, _ in tcs],
         concept_names=[name for _, name in tcs],

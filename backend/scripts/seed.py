@@ -91,6 +91,7 @@ def seed():
                 discrimination=discrimination,
                 guessing=guessing,
                 estimated_time_seconds=estimated_time,
+                answer_type=answer_type,
                 is_active=True,
             )
             db.add(task)

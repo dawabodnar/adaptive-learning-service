@@ -124,15 +124,27 @@ export function Guest() {
 
       <div className={styles.card}>
         <h2 className={styles.taskTitle}>{currentTask.content}</h2>
-        <input
-          type="text"
-          value={answer}
-          onChange={(e) => setAnswer(e.target.value)}
-          onKeyDown={(e) => { if (e.key === 'Enter') handleSubmit(); }}
-          placeholder="Введи відповідь"
-          autoFocus
-          className={styles.input}
-        />
+<input
+  type="text"
+  value={answer}
+  onChange={(e) => {
+    const value = e.target.value;
+    if (currentTask.answer_type === 'number') {
+      const filtered = value.replace(/[^0-9\-.,]/g, '');
+      setAnswer(filtered);
+    } else {
+      setAnswer(value);
+    }
+  }}
+  onKeyDown={(e) => { if (e.key === 'Enter') handleSubmit(); }}
+  placeholder={
+    currentTask.answer_type === 'number'
+      ? 'Введи число'
+      : 'Введи відповідь'
+  }
+  autoFocus
+  className={styles.input}
+/>
         <button
           onClick={handleSubmit}
           disabled={!answer.trim()}
