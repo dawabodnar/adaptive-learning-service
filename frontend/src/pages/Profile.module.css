@@ -11,21 +11,21 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: white;
+  background: var(--bg-surface);
   padding: 20px 24px;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
 }
 
 .title {
   font-size: 22px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text-primary);
 }
 
 .subtitle {
   font-size: 13px;
-  color: #6b7280;
+  color: var(--text-muted);
   margin-top: 4px;
 }
 
@@ -52,8 +52,8 @@
 .logoutBtn {
   padding: 8px 16px;
   background: transparent;
-  color: #6b7280;
-  border: 1px solid #d1d5db;
+  color: var(--text-muted);
+  border: 1px solid var(--border-strong);
   border-radius: 6px;
   font-size: 13px;
   cursor: pointer;
@@ -67,10 +67,10 @@
   display: flex;
   align-items: center;
   gap: 20px;
-  background: white;
+  background: var(--bg-surface);
   padding: 24px;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
 }
 
 .avatar {
@@ -94,7 +94,7 @@
 .userName {
   font-size: 18px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text-primary);
 }
 
 .userEmail {
@@ -105,7 +105,7 @@
 
 .userMeta {
   font-size: 12px;
-  color: #9ca3af;
+  color: var(--text-faint);
   margin-top: 6px;
 }
 
@@ -116,11 +116,11 @@
 }
 
 .stat {
-  background: white;
+  background: var(--bg-surface);
   padding: 20px 16px;
   border-radius: 12px;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
 }
 
 .statValue {
@@ -131,29 +131,29 @@
 
 .statLabel {
   font-size: 11px;
-  color: #6b7280;
+  color: var(--text-muted);
   margin-top: 4px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .historyCard {
-  background: white;
+  background: var(--bg-surface);
   padding: 24px;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
 }
 
 .cardTitle {
   font-size: 16px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text-primary);
   margin-bottom: 16px;
 }
 
 .empty {
   text-align: center;
-  color: #9ca3af;
+  color: var(--text-faint);
   font-size: 14px;
   padding: 30px 0;
 }
@@ -168,7 +168,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 12px 0;
-  border-bottom: 0.5px solid #e5e7eb;
+  border-bottom: 0.5px solid var(--border-light);
 }
 
 .sessionRow:last-child {
@@ -178,12 +178,12 @@
 .sessionTitle {
   font-size: 14px;
   font-weight: 500;
-  color: #1a1a1a;
+  color: var(--text-primary);
 }
 
 .sessionMeta {
   font-size: 12px;
-  color: #6b7280;
+  color: var(--text-muted);
   margin-top: 2px;
 }
 
@@ -209,5 +209,5 @@
   justify-content: center;
   min-height: 100vh;
   font-size: 14px;
-  color: #6b7280;
+  color: var(--text-muted);
 }

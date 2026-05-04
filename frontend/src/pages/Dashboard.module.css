@@ -11,21 +11,21 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: white;
+  background: var(--bg-surface);
   padding: 20px 24px;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
 }
 
 .title {
   font-size: 22px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text-primary);
 }
 
 .subtitle {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--text-muted);
   margin-top: 4px;
 }
 
@@ -53,8 +53,8 @@
 .logoutBtn {
   padding: 8px 16px;
   background: transparent;
-  color: #6b7280;
-  border: 1px solid #d1d5db;
+  color: var(--text-muted);
+  border: 1px solid var(--border-strong);
   border-radius: 6px;
   font-size: 13px;
   cursor: pointer;
@@ -65,10 +65,10 @@
 }
 
 .card {
-  background: white;
+  background: var(--bg-surface);
   padding: 32px;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -77,12 +77,12 @@
 .cardTitle {
   font-size: 18px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text-primary);
 }
 
 .description {
   font-size: 14px;
-  color: #4a4a4a;
+  color: var(--text-secondary);
   line-height: 1.5;
 }
 
@@ -116,7 +116,7 @@
   left: 2px;
   width: 18px;
   height: 18px;
-  background: white;
+  background: var(--bg-surface);
   border-radius: 50%;
   transition: left 0.2s;
 }
@@ -127,13 +127,13 @@
 
 .toggleLabel {
   font-size: 14px;
-  color: #1a1a1a;
+  color: var(--text-primary);
   font-weight: 500;
 }
 
 .toggleHint {
   font-size: 12px;
-  color: #6b7280;
+  color: var(--text-muted);
   margin-top: 2px;
 }
 
@@ -175,7 +175,7 @@
 
 .rangeBlock {
   padding: 14px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-light);
   border-radius: 8px;
   transition: opacity 0.2s;
 }
@@ -183,7 +183,7 @@
 .rangeDisabled {
   opacity: 0.6;
   pointer-events: none;
-  background: #f9fafb;
+  background: var(--bg-elevated);
 }
 
 .label {
@@ -191,7 +191,7 @@
   flex-direction: column;
   gap: 8px;
   font-size: 14px;
-  color: #4a4a4a;
+  color: var(--text-secondary);
 }
 
 .range {
@@ -203,7 +203,7 @@
   display: flex;
   justify-content: space-between;
   font-size: 12px;
-  color: #9ca3af;
+  color: var(--text-faint);
 }
 
 .startBtn {
@@ -242,5 +242,5 @@
   justify-content: center;
   min-height: 100vh;
   font-size: 14px;
-  color: #6b7280;
+  color: var(--text-muted);
 }

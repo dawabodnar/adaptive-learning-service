@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuthStore } from '../store/authStore';
 import styles from './DbAdminDashboard.module.css';
+import { ThemeToggle } from '../components/ThemeToggle';
 
 export function DbAdminDashboard() {
   const navigate = useNavigate();
@@ -64,7 +65,10 @@ export function DbAdminDashboard() {
           <h1 className={styles.title}>Адміністрування БД</h1>
           <p className={styles.subtitle}>{user.email}</p>
         </div>
-        <button onClick={handleLogout} className={styles.logoutBtn}>Вийти</button>
+        <div className={styles.headerActions}>
+          <ThemeToggle />
+          <button onClick={handleLogout} className={styles.logoutBtn}>Вийти</button>
+        </div>
       </header>
 
       <section className={styles.card}>

@@ -8,15 +8,15 @@
 }
 
 .header {
-  background: white;
+  background: var(--bg-surface);
   padding: 20px 24px;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
 }
 
 .progress {
   font-size: 13px;
-  color: #6b7280;
+  color: var(--text-muted);
   margin-bottom: 12px;
 }
 
@@ -34,10 +34,10 @@
 }
 
 .card {
-  background: white;
+  background: var(--bg-surface);
   padding: 32px;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -46,18 +46,18 @@
 .taskTitle {
   font-size: 20px;
   font-weight: 500;
-  color: #1a1a1a;
+  color: var(--text-primary);
   line-height: 1.5;
 }
 
 .timeHint {
   font-size: 13px;
-  color: #9ca3af;
+  color: var(--text-faint);
 }
 
 .input {
   padding: 14px 16px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-strong);
   border-radius: 8px;
   font-size: 16px;
   outline: none;
@@ -96,7 +96,7 @@
 
 .historyTitle {
   font-size: 13px;
-  color: #6b7280;
+  color: var(--text-muted);
   font-weight: 600;
   margin-bottom: 8px;
 }

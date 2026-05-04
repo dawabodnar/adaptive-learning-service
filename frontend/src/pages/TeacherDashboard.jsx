@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuthStore } from '../store/authStore';
 import styles from './TeacherDashboard.module.css';
+import { ThemeToggle } from '../components/ThemeToggle';
 
 export function TeacherDashboard() {
   const navigate = useNavigate();
@@ -42,7 +43,10 @@ export function TeacherDashboard() {
           <h1 className={styles.title}>Кабінет викладача</h1>
           <p className={styles.subtitle}>{user.email}</p>
         </div>
-        <button onClick={handleLogout} className={styles.logoutBtn}>Вийти</button>
+        <div className={styles.headerActions}>
+          <ThemeToggle />
+          <button onClick={handleLogout} className={styles.logoutBtn}>Вийти</button>
+        </div>
       </header>
 
       <section className={styles.card}>

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuthStore } from '../store/authStore';
 import styles from './Dashboard.module.css';
+import { ThemeToggle } from '../components/ThemeToggle';
 
 export function Dashboard() {
   const navigate = useNavigate();
@@ -62,10 +63,11 @@ export function Dashboard() {
           <h1 className={styles.title}>Адаптивне навчання</h1>
           <p className={styles.subtitle}>Привіт, {user.full_name || user.email}</p>
         </div>
-        <div className={styles.headerActions}>
-          <Link to="/profile" className={styles.profileLink}>Профіль</Link>
-          <button onClick={handleLogout} className={styles.logoutBtn}>Вийти</button>
-        </div>
+<div className={styles.headerActions}>
+  <ThemeToggle />
+  <Link to="/profile" className={styles.profileLink}>Профіль</Link>
+  <button onClick={handleLogout} className={styles.logoutBtn}>Вийти</button>
+</div>
       </header>
 
       <main className={styles.card}>

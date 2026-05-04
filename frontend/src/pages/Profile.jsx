@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuthStore } from '../store/authStore';
 import styles from './Profile.module.css';
+import { ThemeToggle } from '../components/ThemeToggle';
 
 export function Profile() {
   const navigate = useNavigate();
@@ -46,6 +47,7 @@ export function Profile() {
           <p className={styles.subtitle}>{user.email} · {translateRole(user.role)}</p>
         </div>
         <div className={styles.headerActions}>
+           <ThemeToggle />
           <Link to="/dashboard" className={styles.backLink}>Дашборд</Link>
           <button onClick={handleLogout} className={styles.logoutBtn}>Вийти</button>
         </div>

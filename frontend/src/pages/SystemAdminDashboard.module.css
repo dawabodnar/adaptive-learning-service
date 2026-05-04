@@ -11,39 +11,39 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: white;
+  background: var(--bg-surface);
   padding: 20px 24px;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
 }
 
 .title {
   font-size: 22px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text-primary);
 }
 
 .subtitle {
   font-size: 13px;
-  color: #6b7280;
+  color: var(--text-muted);
   margin-top: 4px;
 }
 
 .logoutBtn {
   padding: 8px 16px;
   background: transparent;
-  color: #6b7280;
-  border: 1px solid #d1d5db;
+  color: var(--text-muted);
+  border: 1px solid var(--border-strong);
   border-radius: 6px;
   font-size: 13px;
   cursor: pointer;
 }
 
 .card {
-  background: white;
+  background: var(--bg-surface);
   padding: 24px;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
 }
 
 .cardHead {
@@ -56,7 +56,7 @@
 .cardTitle {
   font-size: 16px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text-primary);
 }
 
 .addBtn {
@@ -92,7 +92,7 @@
 
 .blocked {
   opacity: 0.5;
-  background: #f9fafb;
+  background: var(--bg-elevated);
 }
 
 .avatar {
@@ -111,7 +111,7 @@
 .userName {
   font-size: 13px;
   font-weight: 500;
-  color: #1a1a1a;
+  color: var(--text-primary);
 }
 
 .blockedBadge {
@@ -127,18 +127,18 @@
 
 .userEmail {
   font-size: 11px;
-  color: #6b7280;
+  color: var(--text-muted);
   margin-top: 2px;
 }
 
 .roleSelect {
   padding: 5px 8px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-light);
   border-radius: 4px;
   font-size: 11px;
   font-family: inherit;
   cursor: pointer;
-  background: white;
+  background: var(--bg-surface);
 }
 
 .role_student { background: #eef2ff; color: #4f46e5; border-color: #c7d2fe; }
@@ -176,7 +176,7 @@
 }
 
 .form {
-  background: #f9fafb;
+  background: var(--bg-elevated);
   padding: 18px;
   border-radius: 10px;
   margin-bottom: 16px;
@@ -196,17 +196,17 @@
   flex-direction: column;
   gap: 6px;
   font-size: 13px;
-  color: #4a4a4a;
+  color: var(--text-secondary);
 }
 
 .input {
   padding: 8px 10px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-strong);
   border-radius: 6px;
   font-size: 13px;
   outline: none;
   font-family: inherit;
-  background: white;
+  background: var(--bg-surface);
 }
 
 .input:focus {
@@ -242,5 +242,5 @@
   justify-content: center;
   min-height: 100vh;
   font-size: 14px;
-  color: #6b7280;
+  color: var(--text-muted);
 }

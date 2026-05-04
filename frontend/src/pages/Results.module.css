@@ -11,23 +11,23 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: white;
+  background: var(--bg-surface);
   padding: 20px 24px;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
 }
 
 .title {
   font-size: 22px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text-primary);
 }
 
 .backBtn {
   padding: 8px 16px;
   background: transparent;
-  color: #6b7280;
-  border: 1px solid #d1d5db;
+  color: var(--text-muted);
+  border: 1px solid var(--border-strong);
   border-radius: 6px;
   font-size: 13px;
 }
@@ -43,10 +43,10 @@
 }
 
 .metric {
-  background: white;
+  background: var(--bg-surface);
   padding: 24px 20px;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
   text-align: center;
 }
 
@@ -58,7 +58,7 @@
 
 .metricLabel {
   font-size: 12px;
-  color: #6b7280;
+  color: var(--text-muted);
   margin-top: 4px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -66,10 +66,10 @@
 
 .card,
 .weakCard {
-  background: white;
+  background: var(--bg-surface);
   padding: 24px;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
 }
 
 .weakCard {
@@ -80,7 +80,7 @@
 .sectionTitle {
   font-size: 16px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text-primary);
   margin-bottom: 16px;
 }
 
@@ -97,7 +97,7 @@
 
 .weakList li {
   padding: 8px 12px;
-  background: white;
+  background: var(--bg-surface);
   border-radius: 6px;
   margin-bottom: 6px;
   font-size: 14px;
@@ -125,7 +125,7 @@
 
 .conceptName {
   font-weight: 500;
-  color: #1a1a1a;
+  color: var(--text-primary);
 }
 
 .accuracyHigh {
@@ -180,5 +180,5 @@
   justify-content: center;
   min-height: 100vh;
   font-size: 14px;
-  color: #6b7280;
+  color: var(--text-muted);
 }
