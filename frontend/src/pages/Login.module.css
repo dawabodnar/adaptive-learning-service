@@ -80,3 +80,25 @@
   color: var(--text-muted);
   margin-top: 8px;
 }
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 4px 0;
+  color: var(--text-faint);
+  font-size: 12px;
+  gap: 12px;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-light);
+}
+
+.googleWrap {
+  display: flex;
+  justify-content: center;
+}

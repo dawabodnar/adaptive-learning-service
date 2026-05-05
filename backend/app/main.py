@@ -13,7 +13,7 @@ from app.schemas import UserOut
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    #Base.metadata.create_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
     yield
 
 

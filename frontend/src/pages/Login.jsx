@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
 import { api } from '../api/client';
 import { useAuthStore } from '../store/authStore';
 import styles from './Login.module.css';
@@ -11,6 +12,13 @@ export function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  function redirectByRole(role) {
+    if (role === 'teacher') navigate('/teacher');
+    else if (role === 'db_admin') navigate('/admin/db');
+    else if (role === 'system_admin') navigate('/admin/users');
+    else navigate('/dashboard');
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -26,20 +34,28 @@ export function Login() {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       });
 
-localStorage.setItem('access_token', data.access_token);
-setUser(data.user);
-// Переадресація залежно від ролі
-if (data.user.role === 'teacher') {
-  navigate('/teacher');
-} else if (data.user.role === 'db_admin') {
-  navigate('/admin/db');
-} else if (data.user.role === 'system_admin') {
-  navigate('/admin/users');
-} else {
-  navigate('/dashboard');
-}
+      localStorage.setItem('access_token', data.access_token);
+      setUser(data.user);
+      redirectByRole(data.user.role);
     } catch (err) {
       setError(err.response?.data?.detail ?? 'Помилка входу');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleGoogleSuccess(credentialResponse) {
+    setError(null);
+    setLoading(true);
+    try {
+      const { data } = await api.post('/auth/google', {
+        credential: credentialResponse.credential,
+      });
+      localStorage.setItem('access_token', data.access_token);
+      setUser(data.user);
+      redirectByRole(data.user.role);
+    } catch (err) {
+      setError(err.response?.data?.detail ?? 'Помилка входу через Google');
     } finally {
       setLoading(false);
     }
@@ -80,12 +96,28 @@ if (data.user.role === 'teacher') {
           {loading ? 'Входжу...' : 'Увійти'}
         </button>
 
+        <div className={styles.divider}>
+          <span>або</span>
+        </div>
+
+        <div className={styles.googleWrap}>
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={() => setError('Google авторизація не вдалася')}
+            theme="outline"
+            size="large"
+            text="continue_with"
+            locale="uk"
+            width="320"
+          />
+        </div>
+
         <p className={styles.linkRow}>
           Немає акаунту? <Link to="/register">Зареєструватись</Link>
         </p>
         <p className={styles.linkRow}>
-  Або <Link to="/guest">спробуй без реєстрації</Link>
-</p>
+          Або <Link to="/guest">спробуй без реєстрації</Link>
+        </p>
       </form>
     </div>
   );
