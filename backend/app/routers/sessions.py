@@ -259,17 +259,13 @@ def get_suggested_budget(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """
-    Бюджет часу для нової сесії:
-    1) історія є → середній час, витрачений на завдання у попередніх сесіях;
-    2) історії немає → стартове значення з профілю користувача.
-    """
+    # Беремо ВСІ сесії (без ліміту), або хоча б збільшуємо ліміт
     sessions = (
         db.query(LearningSession)
         .filter(LearningSession.user_id == current_user.id)
+        .filter(LearningSession.finished_at.isnot(None))  # тільки завершені
         .order_by(LearningSession.started_at.desc())
-        .limit(10)
-        .all()
+        .all()  # без .limit(10)
     )
 
     if not sessions:
@@ -277,39 +273,36 @@ def get_suggested_budget(
         return {
             "time_budget_seconds": budget,
             "source": "initial",
-            "explanation": f"Це твоя перша сесія — використовуємо стартове значення T = {budget // 60} хв (встановлено при реєстрації).",
+            "explanation": f"Це твоя перша сесія — використовуємо стартове значення T = {budget // 60} хв.",
             "based_on_sessions": 0,
         }
 
-    # Збираємо фактичний час, витрачений на завдання у кожній сесії
     durations = []
     for s in sessions:
         st_rows = db.query(SessionTask).filter_by(session_id=s.id).all()
-        time_spent = sum(
-            (r.time_spent_seconds or 0)
-            for r in st_rows
-            if r.is_correct is not None
-        )
-        if time_spent >= 30:  # хоча б півхвилини активної роботи
+        answered = [r for r in st_rows if r.is_correct is not None]
+        time_spent = sum(r.time_spent_seconds or 0 for r in answered)
+
+        # Знижуємо поріг або прибираємо зовсім — 30с відсіює реальні короткі сесії
+        if time_spent > 0:
             durations.append(time_spent)
 
     if not durations:
-        # Якщо жодна сесія не дала валідних даних — беремо бюджет останньої
-        budget = sessions[0].time_budget_seconds
+        budget = current_user.initial_time_budget_seconds or 1800
         return {
             "time_budget_seconds": int(budget),
-            "source": "previous",
-            "explanation": f"Використовуємо T = {int(budget) // 60} хв з попередньої сесії (даних замало для прогнозу).",
+            "source": "initial",
+            "explanation": f"Немає валідних даних — використовуємо стартове значення T = {int(budget) // 60} хв.",
             "based_on_sessions": 0,
         }
 
     avg = sum(durations) / len(durations)
-    rounded = max(300, min(7200, round(avg / 60) * 60))
+    rounded = max(60, min(7200, round(avg / 60) * 60))
 
     return {
         "time_budget_seconds": int(rounded),
         "source": "history",
-        "explanation": f"На основі {len(durations)} твоїх попередніх сесій система розрахувала T = {int(rounded) // 60} хв.",
+        "explanation": f"На основі {len(durations)} твоїх сесій: T = {int(rounded) // 60} хв.",
         "based_on_sessions": len(durations),
     }
 

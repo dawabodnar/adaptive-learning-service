@@ -10,36 +10,72 @@ export function Session() {
 
   const sessionData = location.state?.sessionData;
   const hasFinishedRef = useRef(false);
+  const submittingRef = useRef(false);
+  const answerRef = useRef('');
+  const currentTaskRef = useRef(null);
+  const taskStartTimeRef = useRef(Date.now());
 
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(() => {
+    const saved = sessionStorage.getItem(`session_${sessionId}_index`);
+    return saved ? parseInt(saved) : 0;
+  });
+
+  const [results, setResults] = useState(() => {
+    const saved = sessionStorage.getItem(`session_${sessionId}_results`);
+    return saved ? JSON.parse(saved) : [];
+  });
+
   const [answer, setAnswer] = useState('');
-  const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [taskStartTime, setTaskStartTime] = useState(Date.now());
   const inputRef = useRef(null);
   const [endTime, setEndTime] = useState(null);
   const [now, setNow] = useState(Date.now());
 
-useEffect(() => {
-  if (sessionData?.end_time) {
-    setEndTime(new Date(sessionData.end_time).getTime());
-    setNow(Date.now());
-  }
-}, [sessionData]);
+  // Синхронізуємо answer → ref
+  useEffect(() => {
+    answerRef.current = answer;
+  }, [answer]);
+
+  // Зберігаємо індекс
+  useEffect(() => {
+    sessionStorage.setItem(`session_${sessionId}_index`, currentIndex);
+  }, [currentIndex, sessionId]);
+
+  // Зберігаємо results
+  useEffect(() => {
+    sessionStorage.setItem(`session_${sessionId}_results`, JSON.stringify(results));
+  }, [results, sessionId]);
+
+  useEffect(() => {
+    if (sessionData?.end_time) {
+      setEndTime(new Date(sessionData.end_time).getTime());
+      setNow(Date.now());
+    }
+  }, [sessionData]);
 
   useEffect(() => {
     if (!endTime) return;
-
-    const interval = setInterval(() => {
-      setNow(Date.now());
-    }, 1000);
-
+    const interval = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(interval);
   }, [endTime]);
 
-  // null поки endTime не завантажився — щоб не показувати 0:00
+  useEffect(() => {
+    if (!sessionData) navigate('/dashboard');
+  }, [sessionData, navigate]);
+
+  useEffect(() => {
+    if (inputRef.current) inputRef.current.focus();
+  }, [currentIndex]);
+
   const remaining = endTime ? Math.max(0, endTime - now) : null;
   const isTimeUp = remaining !== null && remaining <= 0;
+
+  useEffect(() => {
+    if (!isTimeUp) return;
+    if (hasFinishedRef.current) return;
+    finishSessionAutomatically();
+  }, [isTimeUp]);
 
   function formatTime(ms) {
     const total = Math.max(0, Math.floor(ms / 1000));
@@ -48,81 +84,89 @@ useEffect(() => {
     return `${m}:${s.toString().padStart(2, '0')}`;
   }
 
-  useEffect(() => {
-    if (!isTimeUp) return;
-
-    finishSessionAutomatically();
-  }, [isTimeUp]);
-
   async function finishSessionAutomatically() {
     if (hasFinishedRef.current) return;
     hasFinishedRef.current = true;
 
+    const currentAnswer = answerRef.current;
+    const task = currentTaskRef.current;
+
+    if (currentAnswer.trim() && task && !submittingRef.current) {
+      try {
+        await api.post(`/sessions/${sessionId}/answer`, {
+          task_id: task.id,
+          answer: currentAnswer.trim(),
+          time_spent_seconds: Math.round((Date.now() - taskStartTimeRef.current) / 1000),
+        });
+      } catch (e) {
+        console.error('Auto-submit failed:', e);
+      }
+    }
+
     try {
       await api.post(`/sessions/${sessionId}/finish`);
+      sessionStorage.removeItem(`session_${sessionId}_index`);
+      sessionStorage.removeItem(`session_${sessionId}_results`);
       navigate(`/results/${sessionId}`);
     } catch (e) {
       console.error(e);
     }
   }
 
-  useEffect(() => {
-    if (!sessionData) {
-      navigate('/dashboard');
-    }
-  }, [sessionData, navigate]);
-
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [currentIndex]);
-
   if (!sessionData) return null;
 
   const tasks = sessionData.tasks;
   const currentTask = tasks[currentIndex];
+  // ← синхронно оновлюємо ref — не через useEffect
+  currentTaskRef.current = currentTask;
+
   const isLast = currentIndex === tasks.length - 1;
 
-const submittingRef = useRef(false);
+  async function handleSubmitAnswer() {
+    if (isTimeUp) return;
+    if (!answer.trim()) return;
+    if (submittingRef.current) return;
+    if (hasFinishedRef.current) return;
 
-async function handleSubmitAnswer() {
-  if (isTimeUp) return;
-  if (!answer.trim()) return;
-  if (submittingRef.current) return; // ← блокуємо повторний виклик
-  
-  submittingRef.current = true;
-  setLoading(true);
+    submittingRef.current = true;
+    setLoading(true);
 
-  const timeSpent = Math.round((Date.now() - taskStartTime) / 1000);
+    const timeSpent = Math.round((Date.now() - taskStartTimeRef.current) / 1000);
 
-  try {
-    const { data } = await api.post(`/sessions/${sessionId}/answer`, {
-      task_id: currentTask.id,
-      answer: answer.trim(),
-      time_spent_seconds: timeSpent,
-    });
+    try {
+      const { data } = await api.post(`/sessions/${sessionId}/answer`, {
+        task_id: currentTask.id,
+        answer: answer.trim(),
+        time_spent_seconds: timeSpent,
+      });
 
-    setResults((prev) => [...prev, data]);
-    setAnswer('');
+      setResults((prev) => [...prev, data]);
+      setAnswer('');
 
-    if (isLast) {
-      if (hasFinishedRef.current) return;
-      hasFinishedRef.current = true;
-      await api.post(`/sessions/${sessionId}/finish`);
-      navigate(`/results/${sessionId}`);
-    } else {
-      setCurrentIndex(currentIndex + 1);
-      setTaskStartTime(Date.now());
+      if (isLast) {
+        if (hasFinishedRef.current) return;
+        hasFinishedRef.current = true;
+        await api.post(`/sessions/${sessionId}/finish`);
+        sessionStorage.removeItem(`session_${sessionId}_index`);
+        sessionStorage.removeItem(`session_${sessionId}_results`);
+        navigate(`/results/${sessionId}`);
+        return;
+      } else {
+        setCurrentIndex(currentIndex + 1);
+        const newTime = Date.now();
+        setTaskStartTime(newTime);
+        taskStartTimeRef.current = newTime; // ← синхронізуємо ref
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Помилка відправки відповіді: ' + (err.response?.data?.detail ?? 'спробуй ще раз'));
+    } finally {
+      setLoading(false);
+      if (!hasFinishedRef.current) {
+        submittingRef.current = false;
+      }
     }
-  } catch (err) {
-    console.error(err);
-    alert('Помилка відправки відповіді: ' + (err.response?.data?.detail ?? 'спробуй ще раз'));
-  } finally {
-    setLoading(false);
-    submittingRef.current = false; // ← розблоковуємо тільки після завершення
   }
-}
 
   return (
     <div className={styles.container}>
@@ -174,6 +218,7 @@ async function handleSubmitAnswer() {
         />
 
         <button
+          type="button"
           onClick={handleSubmitAnswer}
           className={styles.submitBtn}
           disabled={loading || !answer.trim() || isTimeUp}
