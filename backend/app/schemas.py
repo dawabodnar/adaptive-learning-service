@@ -3,7 +3,7 @@ from typing import Literal
 
 from pydantic import BaseModel, EmailStr, Field
 
-Role = Literal["student", "teacher", "db_admin", "system_admin"]
+Role = Literal["student", "teacher", "system_admin"]
 
 
 class UserRegister(BaseModel):
@@ -11,6 +11,7 @@ class UserRegister(BaseModel):
     password: str = Field(min_length=6, max_length=128)
     full_name: str | None = None
     role: Role = "student"
+    initial_time_budget_minutes: int = Field(default=30, ge=5, le=120)
 
 
 class UserLogin(BaseModel):
@@ -56,6 +57,7 @@ class SessionStartResponse(BaseModel):
     total_estimated_seconds: int
     total_utility: float
     tasks: list[TaskOut]
+    end_time: datetime
 
 class AnswerSubmit(BaseModel):
     task_id: int

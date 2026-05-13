@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuthStore } from '../store/authStore';
-import styles from './TeacherDashboard.module.css';
 import { ThemeToggle } from '../components/ThemeToggle';
+import styles from './TeacherDashboard.module.css';
 
 export function TeacherDashboard() {
   const navigate = useNavigate();
@@ -39,14 +39,27 @@ export function TeacherDashboard() {
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <div>
+        <div className={styles.headerLeft}>
           <h1 className={styles.title}>Кабінет викладача</h1>
           <p className={styles.subtitle}>{user.email}</p>
         </div>
-        <div className={styles.headerActions}>
+        <nav className={styles.headerNav}>
+          <button 
+            className={`${styles.navBtn} ${styles.active}`}
+            disabled
+          >
+            ✓ Статистика
+          </button>
+          <button 
+            onClick={() => navigate('/teacher/tasks')} 
+            className={styles.navBtn}
+          >
+            ✓ Завдання
+          </button>
+          <div className={styles.divider}></div>
           <ThemeToggle />
           <button onClick={handleLogout} className={styles.logoutBtn}>Вийти</button>
-        </div>
+        </nav>
       </header>
 
       <section className={styles.card}>
@@ -56,9 +69,7 @@ export function TeacherDashboard() {
           <p className={styles.empty}>Поки немає жодного студента.</p>
         ) : (
           <div className={styles.studentList}>
-            {students.map((s) => (
-              <StudentCard key={s.id} student={s} />
-            ))}
+            {students.map((s) => <StudentCard key={s.id} student={s} />)}
           </div>
         )}
       </section>
@@ -74,14 +85,11 @@ function StudentCard({ student }) {
   return (
     <div className={styles.studentRow}>
       <div className={styles.studentHead}>
-        <div className={styles.studentName}>
-          {student.full_name || student.email}
-        </div>
+        <div className={styles.studentName}>{student.full_name || student.email}</div>
         <div className={styles.studentStats}>
           {student.total_sessions} сесій · {hasData ? `${accuracyPercent}% точність` : 'без даних'}
         </div>
       </div>
-
       {hasData && (
         <div className={styles.bar}>
           <div
@@ -90,11 +98,8 @@ function StudentCard({ student }) {
           />
         </div>
       )}
-
       {student.weak_concepts.length > 0 && (
-        <div className={styles.weakLine}>
-          Слабкі теми: {student.weak_concepts.join(', ')}
-        </div>
+        <div className={styles.weakLine}>Слабкі теми: {student.weak_concepts.join(', ')}</div>
       )}
     </div>
   );

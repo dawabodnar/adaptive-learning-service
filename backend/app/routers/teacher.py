@@ -1,5 +1,9 @@
-"""Ендпоїнти для викладача — статистика студентів і прогрес."""
-from fastapi import APIRouter, Depends, HTTPException
+"""Ендпоїнти кабінету викладача — статистика студентів і керування завданнями."""
+from datetime import datetime, timezone
+from typing import Optional
+
+from fastapi import APIRouter, Depends, HTTPException, Path, status
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -9,11 +13,12 @@ from app.models import (
     KnowledgeState,
     LearningSession,
     SessionTask,
+    Task,
+    TaskConcept,
     User,
 )
 
 router = APIRouter(prefix="/teacher", tags=["teacher"])
-
 
 @router.get("/students")
 def list_students(
@@ -25,21 +30,18 @@ def list_students(
 
     result = []
     for s in students:
-        sessions = db.query(LearningSession).filter(LearningSession.user_id == s.id).all()
-        session_ids = [sess.id for sess in sessions]
+        # Отримуємо сесії конкретного студента
+        student_sessions = db.query(LearningSession).filter(LearningSession.user_id == s.id).all()
+        
+        # Отримуємо всі відповіді цього студента через його сесії
+        all_session_tasks = db.query(SessionTask).join(
+            LearningSession, SessionTask.session_id == LearningSession.id
+        ).filter(LearningSession.user_id == s.id).all()
 
-        all_st = (
-            db.query(SessionTask)
-            .filter(SessionTask.session_id.in_(session_ids))
-            .all()
-            if session_ids else []
-        )
-
-        answered = [r for r in all_st if r.is_correct is not None]
+        answered = [r for r in all_session_tasks if r.is_correct is not None]
         correct = sum(1 for r in answered if r.is_correct)
         accuracy = round(correct / len(answered), 4) if answered else 0.0
 
-        # Слабкі концепти — де p_known < 0.5
         weak_states = (
             db.query(KnowledgeState, Concept.name)
             .join(Concept, KnowledgeState.concept_id == Concept.id)
@@ -53,7 +55,7 @@ def list_students(
             "id": s.id,
             "email": s.email,
             "full_name": s.full_name,
-            "total_sessions": len(sessions),
+            "total_sessions": len(student_sessions),
             "total_answered": len(answered),
             "accuracy": accuracy,
             "weak_concepts": weak_concepts,
@@ -68,7 +70,7 @@ def student_progress(
     _: User = Depends(require_role("teacher", "system_admin")),
     db: Session = Depends(get_db),
 ):
-    """Детальний прогрес конкретного студента — профіль знань і сесії."""
+    """Детальний прогрес конкретного студента."""
     student = db.query(User).filter(User.id == user_id, User.role == "student").first()
     if not student:
         raise HTTPException(404, "Студента не знайдено")
@@ -98,7 +100,7 @@ def student_progress(
 
     sessions_data = []
     for s in sessions:
-        st_rows = db.query(SessionTask).filter_by(session_id=s.id).all()
+        st_rows = db.query(SessionTask).filter(SessionTask.session_id == s.id).all()
         answered = [r for r in st_rows if r.is_correct is not None]
         correct = sum(1 for r in answered if r.is_correct)
         accuracy = round(correct / len(answered), 4) if answered else 0.0
@@ -122,3 +124,201 @@ def student_progress(
         "knowledge_profile": knowledge_profile,
         "sessions": sessions_data,
     }
+
+class TaskConceptIn(BaseModel):
+    concept_id: int
+    weight: float = 1.0
+
+
+class TaskCreate(BaseModel):
+    content: str = Field(min_length=3)
+    correct_answer: str = Field(min_length=1)
+    difficulty: float = 0.0
+    discrimination: float = 1.0
+    guessing: float = 0.25
+    estimated_time_seconds: int = Field(ge=10, le=3600, default=60)
+    answer_type: str = Field(default="text", pattern="^(text|number)$")
+    concepts: list[TaskConceptIn] = []
+
+
+class TaskUpdate(BaseModel):
+    content: Optional[str] = None
+    correct_answer: Optional[str] = None
+    difficulty: Optional[float] = None
+    discrimination: Optional[float] = None
+    guessing: Optional[float] = None
+    estimated_time_seconds: Optional[int] = None
+    answer_type: Optional[str] = None
+    is_active: Optional[bool] = None
+
+
+class TaskOut(BaseModel):
+    id: int
+    content: str
+    correct_answer: str
+    difficulty: float
+    discrimination: float
+    guessing: float
+    estimated_time_seconds: int
+    answer_type: str
+    is_active: bool
+    concept_ids: list[int]
+    concept_names: list[str]
+
+
+class ConceptOut(BaseModel):
+    id: int
+    name: str
+    description: Optional[str]
+
+
+@router.get("/concepts", response_model=list[ConceptOut])
+def list_concepts(
+    _: User = Depends(require_role("teacher", "system_admin")),
+    db: Session = Depends(get_db),
+):
+    concepts = db.query(Concept).order_by(Concept.id).all()
+    return [
+        ConceptOut(id=c.id, name=c.name, description=c.description)
+        for c in concepts
+    ]
+
+
+@router.get("/tasks", response_model=list[TaskOut])
+def list_tasks(
+    _: User = Depends(require_role("teacher", "system_admin")),
+    db: Session = Depends(get_db),
+):
+    tasks = db.query(Task).order_by(Task.id).all()
+    result = []
+    for t in tasks:
+        tcs = (
+            db.query(TaskConcept, Concept.name)
+            .join(Concept, TaskConcept.concept_id == Concept.id)
+            .filter(TaskConcept.task_id == t.id)
+            .all()
+        )
+        result.append(TaskOut(
+            id=t.id,
+            content=t.content,
+            correct_answer=t.correct_answer,
+            difficulty=t.difficulty,
+            discrimination=t.discrimination,
+            guessing=t.guessing,
+            estimated_time_seconds=t.estimated_time_seconds,
+            answer_type=t.answer_type,
+            is_active=t.is_active,
+            concept_ids=[tc.concept_id for tc, _ in tcs],
+            concept_names=[name for _, name in tcs],
+        ))
+    return result
+
+
+@router.post("/tasks", response_model=TaskOut, status_code=status.HTTP_201_CREATED)
+def create_task(
+    payload: TaskCreate,
+    _: User = Depends(require_role("teacher", "system_admin")),
+    db: Session = Depends(get_db),
+):
+    if payload.concepts:
+        concept_ids = [c.concept_id for c in payload.concepts]
+        existing = db.query(Concept.id).filter(Concept.id.in_(concept_ids)).all()
+        existing_ids = {c.id for c in existing}
+        missing = set(concept_ids) - existing_ids
+        if missing:
+            raise HTTPException(400, f"Концепти не знайдено: {missing}")
+
+    task = Task(
+        content=payload.content,
+        correct_answer=payload.correct_answer,
+        difficulty=payload.difficulty,
+        discrimination=payload.discrimination,
+        guessing=payload.guessing,
+        estimated_time_seconds=payload.estimated_time_seconds,
+        answer_type=payload.answer_type,
+        is_active=True,
+        created_at=datetime.now(timezone.utc),
+    )
+    db.add(task)
+    db.flush()
+
+    for c in payload.concepts:
+        db.add(TaskConcept(task_id=task.id, concept_id=c.concept_id, weight=c.weight))
+
+    db.commit()
+    db.refresh(task)
+
+    concept_names = []
+    if payload.concepts:
+        concept_names = [
+            n for (n,) in db.query(Concept.name).filter(Concept.id.in_([c.concept_id for c in payload.concepts])).all()
+        ]
+
+    return TaskOut(
+        id=task.id,
+        content=task.content,
+        correct_answer=task.correct_answer,
+        difficulty=task.difficulty,
+        discrimination=task.discrimination,
+        guessing=task.guessing,
+        estimated_time_seconds=task.estimated_time_seconds,
+        answer_type=task.answer_type,
+        is_active=task.is_active,
+        concept_ids=[c.concept_id for c in payload.concepts],
+        concept_names=concept_names,
+    )
+
+
+@router.patch("/tasks/{task_id}", response_model=TaskOut)
+def update_task(
+    payload: TaskUpdate,
+    task_id: int = Path(..., ge=1),
+    _: User = Depends(require_role("teacher", "system_admin")),
+    db: Session = Depends(get_db),
+):
+    task = db.query(Task).filter(Task.id == task_id).first()
+    if not task:
+        raise HTTPException(404, "Завдання не знайдено")
+
+    for field, value in payload.model_dump(exclude_unset=True).items():
+        setattr(task, field, value)
+
+    db.commit()
+    db.refresh(task)
+
+    tcs = (
+        db.query(TaskConcept, Concept.name)
+        .join(Concept, TaskConcept.concept_id == Concept.id)
+        .filter(TaskConcept.task_id == task.id)
+        .all()
+    )
+
+    return TaskOut(
+        id=task.id,
+        content=task.content,
+        correct_answer=task.correct_answer,
+        difficulty=task.difficulty,
+        discrimination=task.discrimination,
+        guessing=task.guessing,
+        estimated_time_seconds=task.estimated_time_seconds,
+        answer_type=task.answer_type,
+        is_active=task.is_active,
+        concept_ids=[tc.concept_id for tc, _ in tcs],
+        concept_names=[name for _, name in tcs],
+    )
+
+
+@router.delete("/tasks/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
+def archive_task(
+    task_id: int = Path(..., ge=1),
+    _: User = Depends(require_role("teacher", "system_admin")),
+    db: Session = Depends(get_db),
+):
+    """Архівує завдання (мʼяке видалення — is_active = false)."""
+    task = db.query(Task).filter(Task.id == task_id).first()
+    if not task:
+        raise HTTPException(404, "Завдання не знайдено")
+
+    task.is_active = False
+    db.commit()
+    return None

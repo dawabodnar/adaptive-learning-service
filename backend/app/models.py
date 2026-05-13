@@ -24,6 +24,7 @@ class User(Base):
     password_hash = Column(String(255), nullable=True)
     full_name = Column(String(255), nullable=True)
     role = Column(String(50), nullable=False, default="student")
+    initial_time_budget_seconds = Column(Integer, default=1800, nullable=False)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
@@ -101,6 +102,7 @@ class LearningSession(Base):
     time_budget_seconds = Column(Integer, nullable=False)
     started_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     finished_at = Column(DateTime, nullable=True)
+    end_time = Column(DateTime(timezone=True), nullable=True)
 
     user = relationship("User", back_populates="sessions")
     session_tasks = relationship("SessionTask", back_populates="session", cascade="all, delete-orphan")

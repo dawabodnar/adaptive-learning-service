@@ -1,17 +1,36 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../api/client';
+import { useAuthStore } from '../store/authStore';
+import { ThemeToggle } from '../components/ThemeToggle';
 import styles from './Results.module.css';
 
 export function Results() {
   const { sessionId } = useParams();
   const navigate = useNavigate();
+  const { logout } = useAuthStore();
   const [stats, setStats] = useState(null);
+  const [sessionNumber, setSessionNumber] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  function handleLogout() {
+    logout();
+    navigate('/login');
+  }
+
   useEffect(() => {
-    api.get(`/sessions/${sessionId}/stats`)
-      .then(({ data }) => setStats(data))
+    Promise.all([
+      api.get(`/sessions/${sessionId}/stats`),
+      api.get('/sessions/my-history')
+    ])
+      .then(([statsRes, historyRes]) => {
+        setStats(statsRes.data);
+        // Знайти номер поточної сесії в історії
+        const currentIndex = historyRes.data.sessions.findIndex(s => s.session_id === parseInt(sessionId));
+        if (currentIndex !== -1) {
+          setSessionNumber(historyRes.data.total_sessions - currentIndex);
+        }
+      })
       .catch((err) => {
         console.error(err);
         navigate('/dashboard');
@@ -23,15 +42,28 @@ export function Results() {
   if (!stats) return null;
 
   const accuracyPercent = Math.round(stats.accuracy * 100);
-  const avgTimeMinutes = Math.round(stats.avg_time_per_task / 60 * 10) / 10;
+  const avgTimeDisplay = stats.avg_time_per_task < 60 
+    ? `${Math.round(stats.avg_time_per_task)} с` 
+    : `${Math.round(stats.avg_time_per_task / 60 * 10) / 10} хв`;
 
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <h1 className={styles.title}>Результати сесії #{stats.session_id}</h1>
-        <button onClick={() => navigate('/dashboard')} className={styles.backBtn}>
-          На головну
-        </button>
+        <div className={styles.headerLeft}>
+          <h1 className={styles.title}>Результати сесії #{sessionNumber || stats.session_id}</h1>
+        </div>
+        <nav className={styles.headerNav}>
+          <button onClick={() => navigate('/dashboard')} className={styles.navBtn}>
+            Дашборд
+          </button>
+          <button onClick={() => navigate('/profile')} className={styles.navBtn}>
+            Профіль
+          </button>
+          <ThemeToggle />
+          <button onClick={handleLogout} className={styles.logoutBtn}>
+            Вийти
+          </button>
+        </nav>
       </header>
 
       <section className={styles.metrics}>
@@ -44,7 +76,7 @@ export function Results() {
           <div className={styles.metricLabel}>Правильних відповідей</div>
         </div>
         <div className={styles.metric}>
-          <div className={styles.metricValue}>{avgTimeMinutes} хв</div>
+          <div className={styles.metricValue}>{avgTimeDisplay}</div>
           <div className={styles.metricLabel}>Середній час</div>
         </div>
       </section>

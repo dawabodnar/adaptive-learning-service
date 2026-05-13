@@ -13,7 +13,7 @@ from app.security import hash_password
 
 router = APIRouter(prefix="/admin/users", tags=["admin_users"])
 
-Role = Literal["student", "teacher", "db_admin", "system_admin"]
+Role = Literal["student", "teacher", "system_admin"]
 
 
 class UserCreate(BaseModel):

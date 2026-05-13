@@ -9,7 +9,7 @@ import { Profile } from './pages/Profile';
 import { Diagnostic } from './pages/Diagnostic';
 import { Guest } from './pages/Guest';
 import { TeacherDashboard } from './pages/TeacherDashboard';
-import { DbAdminDashboard } from './pages/DbAdminDashboard';
+import { TeacherTasks } from './pages/TeacherTasks';
 import { SystemAdminDashboard } from './pages/SystemAdminDashboard';
 
 function App() {
@@ -26,7 +26,7 @@ function App() {
         <Route path="/session/:sessionId" element={<Session />} />
         <Route path="/results/:sessionId" element={<Results />} />
         <Route path="/teacher" element={<TeacherDashboard />} />
-        <Route path="/admin/db" element={<DbAdminDashboard />} />
+        <Route path="/teacher/tasks" element={<TeacherTasks />} />
         <Route path="/admin/users" element={<SystemAdminDashboard />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

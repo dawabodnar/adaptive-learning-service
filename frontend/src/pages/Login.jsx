@@ -15,14 +15,26 @@ export function Login() {
 
   function redirectByRole(role) {
     if (role === 'teacher') navigate('/teacher');
-    else if (role === 'db_admin') navigate('/admin/db');
     else if (role === 'system_admin') navigate('/admin/users');
     else navigate('/dashboard');
   }
 
+  function handleError(err, fallback) {
+    if (err.response?.status === 401) {
+      setError('Невірний email або пароль. Перевір дані і спробуй ще раз.');
+    } else if (err.response?.status === 403) {
+      setError('Цей акаунт заблоковано адміністратором.');
+    } else if (err.response?.status === 422) {
+      setError('Перевір формат email — має бути на кшталт name@example.com.');
+    } else if (err.code === 'ERR_NETWORK' || !err.response) {
+      setError('Сервер недоступний. Переконайся, що бекенд запущено (uvicorn).');
+    } else {
+      setError(err.response?.data?.detail ?? fallback);
+    }
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
-    setError(null);
     setLoading(true);
 
     try {
@@ -34,28 +46,29 @@ export function Login() {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       });
 
+      setError(null);
       localStorage.setItem('access_token', data.access_token);
       setUser(data.user);
       redirectByRole(data.user.role);
     } catch (err) {
-      setError(err.response?.data?.detail ?? 'Помилка входу');
+      handleError(err, 'Помилка входу. Спробуй ще раз.');
     } finally {
       setLoading(false);
     }
   }
 
   async function handleGoogleSuccess(credentialResponse) {
-    setError(null);
     setLoading(true);
     try {
       const { data } = await api.post('/auth/google', {
         credential: credentialResponse.credential,
       });
+      setError(null);
       localStorage.setItem('access_token', data.access_token);
       setUser(data.user);
       redirectByRole(data.user.role);
     } catch (err) {
-      setError(err.response?.data?.detail ?? 'Помилка входу через Google');
+      handleError(err, 'Помилка входу через Google.');
     } finally {
       setLoading(false);
     }
@@ -90,7 +103,19 @@ export function Login() {
           />
         </label>
 
-        {error && <div className={styles.error}>{error}</div>}
+        {error && (
+          <div className={styles.error}>
+            <span className={styles.errorText}>{error}</span>
+            <button
+              type="button"
+              onClick={() => setError(null)}
+              className={styles.errorClose}
+              aria-label="Закрити повідомлення"
+            >
+              ×
+            </button>
+          </div>
+        )}
 
         <button type="submit" className={styles.button} disabled={loading}>
           {loading ? 'Входжу...' : 'Увійти'}

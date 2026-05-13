@@ -17,6 +17,17 @@
   box-shadow: var(--shadow-sm);
 }
 
+.headerLeft {
+  flex: 1;
+}
+
+.headerNav {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
 .title {
   font-size: 22px;
   font-weight: 600;
@@ -29,38 +40,49 @@
   margin-top: 4px;
 }
 
-.headerActions {
-  display: flex;
-  gap: 8px;
-}
-
-.backLink {
-  padding: 8px 16px;
+.navBtn {
+  padding: 8px 14px;
   background: transparent;
-  color: #4f46e5;
-  border: 1px solid #4f46e5;
-  border-radius: 6px;
-  font-size: 13px;
-  text-decoration: none;
-}
-
-.backLink:hover {
-  background: #eef2ff;
-  text-decoration: none;
-}
-
-.logoutBtn {
-  padding: 8px 16px;
-  background: transparent;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   border: 1px solid var(--border-strong);
   border-radius: 6px;
   font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.navBtn:hover:not(:disabled) {
+  background: var(--bg-elevated);
+  border-color: #4f46e5;
+  color: #4f46e5;
+}
+
+.navBtn.active,
+.navBtn:disabled {
+  background: #f0f4ff;
+  border-color: #c7d2fe;
+  color: #4f46e5;
+  cursor: default;
+}
+
+.logoutBtn {
+  padding: 8px 14px;
+  background: transparent;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .logoutBtn:hover {
-  background: #f3f4f6;
+  background: #fef2f2;
+  border-color: #dc2626;
 }
 
 .userCard {
@@ -210,4 +232,8 @@
   min-height: 100vh;
   font-size: 14px;
   color: var(--text-muted);
+}
+.range {
+  width: 100%;
+  accent-color: #4f46e5;
 }

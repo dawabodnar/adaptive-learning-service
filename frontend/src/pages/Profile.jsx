@@ -5,6 +5,17 @@ import { useAuthStore } from '../store/authStore';
 import styles from './Profile.module.css';
 import { ThemeToggle } from '../components/ThemeToggle';
 
+function formatDuration(seconds) {
+  if (!seconds || seconds <= 0) return '0 с';
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+
+  if (h > 0) return `${h} год ${m} хв`;
+  if (m > 0) return `${m} хв ${s} с`;
+  return `${s} с`;
+}
+
 export function Profile() {
   const navigate = useNavigate();
   const { user, setUser, logout } = useAuthStore();
@@ -36,21 +47,26 @@ export function Profile() {
   if (!user || loading) return <div className={styles.loading}>Завантаження...</div>;
   if (!history) return null;
 
-  const totalHours = Math.round((history.total_time_spent_seconds / 3600) * 10) / 10;
+  const totalTimeDisplay = formatDuration(history.total_time_spent_seconds || 0);
   const accuracyPercent = Math.round(history.overall_accuracy * 100);
 
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <div>
+        <div className={styles.headerLeft}>
           <h1 className={styles.title}>Профіль</h1>
           <p className={styles.subtitle}>{user.email} · {translateRole(user.role)}</p>
         </div>
-        <div className={styles.headerActions}>
-           <ThemeToggle />
-          <Link to="/dashboard" className={styles.backLink}>Дашборд</Link>
+        <nav className={styles.headerNav}>
+          <button onClick={() => navigate('/dashboard')} className={styles.navBtn}>
+            Дашборд
+          </button>
+          <button className={`${styles.navBtn} ${styles.active}`} disabled>
+            Профіль
+          </button>
+          <ThemeToggle />
           <button onClick={handleLogout} className={styles.logoutBtn}>Вийти</button>
-        </div>
+        </nav>
       </header>
 
       <section className={styles.userCard}>
@@ -80,7 +96,7 @@ export function Profile() {
           <div className={styles.statLabel}>Точність</div>
         </div>
         <div className={styles.stat}>
-          <div className={styles.statValue}>{totalHours} год</div>
+          <div className={styles.statValue}>{totalTimeDisplay}</div>
           <div className={styles.statLabel}>Сумарно</div>
         </div>
       </section>
@@ -93,8 +109,14 @@ export function Profile() {
           </p>
         ) : (
           <div className={styles.sessionList}>
-            {history.sessions.map((s) => (
-              <SessionRow key={s.session_id} session={s} />
+            {history.sessions.map((s, index) => (
+              <SessionRow
+                key={s.session_id}
+                session={{
+                  ...s,
+                  session_number: history.total_sessions - index,
+                }}
+              />
             ))}
           </div>
         )}
@@ -111,14 +133,13 @@ function SessionRow({ session }) {
         day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit',
       })
     : '';
-  const minutes = Math.round(session.time_budget_seconds / 60);
 
   return (
     <div className={styles.sessionRow}>
       <div className={styles.sessionLeft}>
-        <div className={styles.sessionTitle}>Сесія #{session.session_id}</div>
+        <div className={styles.sessionTitle}>Сесія #{session.session_number}</div>
         <div className={styles.sessionMeta}>
-          {dateStr} · {minutes} хв
+          {dateStr} · {formatDuration(session.time_spent_seconds)}
           {!session.is_finished && <span className={styles.unfinished}> · не завершена</span>}
         </div>
       </div>
@@ -133,7 +154,6 @@ function translateRole(role) {
   switch (role) {
     case 'student': return 'студент';
     case 'teacher': return 'викладач';
-    case 'db_admin': return 'адмін БД';
     case 'system_admin': return 'адмін сервісу';
     default: return role;
   }

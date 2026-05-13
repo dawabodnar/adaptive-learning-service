@@ -28,6 +28,11 @@
   color: var(--text-muted);
   margin-top: 4px;
 }
+.headerActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
 
 .logoutBtn {
   padding: 8px 16px;
@@ -143,7 +148,6 @@
 
 .role_student { background: #eef2ff; color: #4f46e5; border-color: #c7d2fe; }
 .role_teacher { background: #d1fae5; color: #065f46; border-color: #a7f3d0; }
-.role_db_admin { background: #fef3c7; color: #92400e; border-color: #fde68a; }
 .role_system_admin { background: #fee2e2; color: #991b1b; border-color: #fecaca; }
 
 .blockBtn {

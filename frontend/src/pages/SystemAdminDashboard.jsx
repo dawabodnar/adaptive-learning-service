@@ -8,7 +8,6 @@ import { ThemeToggle } from '../components/ThemeToggle';
 const ROLE_LABEL = {
   student: 'студент',
   teacher: 'викладач',
-  db_admin: 'адмін БД',
   system_admin: 'адмін сервісу',
 };
 
