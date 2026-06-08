@@ -10,6 +10,7 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    JSON,
 )
 from sqlalchemy.orm import relationship
 
@@ -50,6 +51,7 @@ class Task(Base):
     id = Column(Integer, primary_key=True, index=True)
     content = Column(Text, nullable=False)
     correct_answer = Column(Text, nullable=False)
+    options = Column(JSON, nullable=True)
     difficulty = Column(Float, default=0.0)
     discrimination = Column(Float, default=1.0)
     guessing = Column(Float, default=0.25)

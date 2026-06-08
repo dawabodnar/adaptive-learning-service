@@ -1,0 +1,64 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# docker-compose.yml — оркестрація компонентів сервісу
+# Розміщення: у корені проєкту (поруч з теками backend/ та frontend/)
+# Запуск:  docker compose up --build
+# Зупинка: docker compose down
+# З видаленням даних БД: docker compose down -v
+# ─────────────────────────────────────────────────────────────────────────────
+services:
+
+  # ─── База даних PostgreSQL ─────────────────────────────────────────────────
+  postgres:
+    image: postgres:15-alpine
+    container_name: adaptive-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: adaptive_learning
+      POSTGRES_USER: dasha
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-adaptive_pass}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dasha -d adaptive_learning"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ─── Бекенд: FastAPI на Python 3.12 ────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: adaptive-backend
+    restart: unless-stopped
+    environment:
+      # Підключення до контейнера postgres за іменем сервісу
+      DATABASE_URL: postgresql://dasha:${POSTGRES_PASSWORD:-adaptive_pass}@postgres:5432/adaptive_learning
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      JWT_ALGORITHM: HS256
+      JWT_EXPIRE_MINUTES: 1440
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ─── Клієнт: React 19 + Vite, подається через Nginx ────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: adaptive-frontend
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+# ─── Постійні томи для збереження даних ──────────────────────────────────────
+volumes:
+  postgres_data:
+    name: adaptive_postgres_data

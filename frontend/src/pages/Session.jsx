@@ -32,17 +32,14 @@ export function Session() {
   const [endTime, setEndTime] = useState(null);
   const [now, setNow] = useState(Date.now());
 
-  // Синхронізуємо answer → ref
   useEffect(() => {
     answerRef.current = answer;
   }, [answer]);
 
-  // Зберігаємо індекс
   useEffect(() => {
     sessionStorage.setItem(`session_${sessionId}_index`, currentIndex);
   }, [currentIndex, sessionId]);
 
-  // Зберігаємо results
   useEffect(() => {
     sessionStorage.setItem(`session_${sessionId}_results`, JSON.stringify(results));
   }, [results, sessionId]);
@@ -64,9 +61,13 @@ export function Session() {
     if (!sessionData) navigate('/dashboard');
   }, [sessionData, navigate]);
 
+  // Авто-фокус на полі вводу — лише якщо немає варіантів
   useEffect(() => {
-    if (inputRef.current) inputRef.current.focus();
-  }, [currentIndex]);
+    const task = sessionData?.tasks[currentIndex];
+    if (task && !task.options && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [currentIndex, sessionData]);
 
   const remaining = endTime ? Math.max(0, endTime - now) : null;
   const isTimeUp = remaining !== null && remaining <= 0;
@@ -117,10 +118,10 @@ export function Session() {
 
   const tasks = sessionData.tasks;
   const currentTask = tasks[currentIndex];
-  // ← синхронно оновлюємо ref — не через useEffect
   currentTaskRef.current = currentTask;
 
   const isLast = currentIndex === tasks.length - 1;
+  const hasOptions = currentTask.options && currentTask.options.length > 0;
 
   async function handleSubmitAnswer() {
     if (isTimeUp) return;
@@ -155,7 +156,7 @@ export function Session() {
         setCurrentIndex(currentIndex + 1);
         const newTime = Date.now();
         setTaskStartTime(newTime);
-        taskStartTimeRef.current = newTime; // ← синхронізуємо ref
+        taskStartTimeRef.current = newTime;
       }
     } catch (err) {
       console.error(err);
@@ -191,31 +192,52 @@ export function Session() {
           Орієнтовний час: {currentTask.estimated_time_seconds} с
         </p>
 
-        <input
-          disabled={isTimeUp}
-          ref={inputRef}
-          type="text"
-          value={answer}
-          onChange={(e) => {
-            const value = e.target.value;
-            if (currentTask.answer_type === 'number') {
-              const filtered = value.replace(/[^0-9\-.,]/g, '');
-              setAnswer(filtered);
-            } else {
-              setAnswer(value);
+        {hasOptions ? (
+          <div className={styles.options}>
+            {currentTask.options.map((option) => (
+              <button
+                key={option}
+                type="button"
+                disabled={isTimeUp || loading}
+                onClick={() => setAnswer(option)}
+                className={`${styles.option} ${
+                  answer === option ? styles.optionSelected : ''
+                }`}
+              >
+                <span className={styles.optionMarker}>
+                  {answer === option ? '●' : '○'}
+                </span>
+                <span className={styles.optionText}>{option}</span>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <input
+            disabled={isTimeUp}
+            ref={inputRef}
+            type="text"
+            value={answer}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (currentTask.answer_type === 'number') {
+                const filtered = value.replace(/[^0-9\-.,]/g, '');
+                setAnswer(filtered);
+              } else {
+                setAnswer(value);
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !loading && !isTimeUp) handleSubmitAnswer();
+            }}
+            className={styles.input}
+            placeholder={
+              currentTask.answer_type === 'number'
+                ? 'Введіть число'
+                : 'Введіть відповідь'
             }
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && !loading && !isTimeUp) handleSubmitAnswer();
-          }}
-          className={styles.input}
-          placeholder={
-            currentTask.answer_type === 'number'
-              ? 'Введіть число'
-              : 'Введіть відповідь'
-          }
-          autoFocus
-        />
+            autoFocus
+          />
+        )}
 
         <button
           type="button"

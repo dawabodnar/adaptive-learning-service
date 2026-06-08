@@ -94,7 +94,6 @@ def google_auth(payload: GoogleAuthIn, db: Session = Depends(get_db)):
         db.refresh(user)
     elif not user.is_active:
         raise HTTPException(403, "Користувача заблоковано")
-
     # Якщо у користувача не було повного імені — оновлюємо з Google
     if not user.full_name and full_name:
         user.full_name = full_name

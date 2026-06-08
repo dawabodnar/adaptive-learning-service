@@ -46,6 +46,7 @@ class TaskOut(BaseModel):
     content: str
     estimated_time_seconds: int
     answer_type: str = "text"
+    options: list[str] | None = None
 
     class Config:
         from_attributes = True
