@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+import os
 
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,7 +10,7 @@ from app.dependencies import get_current_user
 from app.models import User
 from app.routers import admin_users, auth, sessions, teacher
 from app.schemas import UserOut
-
+import os
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -19,9 +20,17 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Adaptive Learning Service", lifespan=lifespan)
 
+
+
+CORS_ORIGINS_RAW = os.getenv(
+    "CORS_ORIGINS",
+    "http://localhost:5173,http://127.0.0.1:5173",
+)
+ALLOW_ORIGINS = [o.strip() for o in CORS_ORIGINS_RAW.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=ALLOW_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
