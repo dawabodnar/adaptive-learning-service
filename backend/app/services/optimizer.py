@@ -20,14 +20,7 @@ class KnapsackItem:
 
 
 def solve_knapsack(items: list[KnapsackItem], capacity: int) -> list[int]:
-    """
-    Розвʼязує 0/1 knapsack методом динамічного програмування.
 
-    Повертає список task_id, що увійшли в оптимальний набір.
-
-    Складність: O(n * capacity) за часом і памʼяттю,
-    де n — кількість завдань.
-    """
     n = len(items)
     if n == 0 or capacity <= 0:
         return []

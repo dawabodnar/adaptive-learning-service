@@ -10,6 +10,7 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    JSON,
 )
 from sqlalchemy.orm import relationship
 
@@ -21,9 +22,10 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String(255), unique=True, nullable=False, index=True)
-    password_hash = Column(String(255), nullable=False)
+    password_hash = Column(String(255), nullable=True)
     full_name = Column(String(255), nullable=True)
     role = Column(String(50), nullable=False, default="student")
+    initial_time_budget_seconds = Column(Integer, default=1800, nullable=False)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
@@ -49,10 +51,12 @@ class Task(Base):
     id = Column(Integer, primary_key=True, index=True)
     content = Column(Text, nullable=False)
     correct_answer = Column(Text, nullable=False)
+    options = Column(JSON, nullable=True)
     difficulty = Column(Float, default=0.0)
     discrimination = Column(Float, default=1.0)
     guessing = Column(Float, default=0.25)
     estimated_time_seconds = Column(Integer, default=60)
+    answer_type = Column(String(20), nullable=False, default="text")  
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
@@ -100,6 +104,7 @@ class LearningSession(Base):
     time_budget_seconds = Column(Integer, nullable=False)
     started_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     finished_at = Column(DateTime, nullable=True)
+    end_time = Column(DateTime(timezone=True), nullable=True)
 
     user = relationship("User", back_populates="sessions")
     session_tasks = relationship("SessionTask", back_populates="session", cascade="all, delete-orphan")

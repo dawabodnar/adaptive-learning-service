@@ -1,0 +1,148 @@
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 32px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-surface);
+  padding: 20px 24px;
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.headerActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.profileLink {
+  padding: 8px 16px;
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.profileLink:hover {
+  background: var(--accent-light);
+  text-decoration: none;
+}
+
+.logoutBtn {
+  padding: 8px 16px;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.logoutBtn:hover {
+  background: var(--bg-elevated);
+}
+
+.card {
+  background: var(--bg-surface);
+  padding: 36px;
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.cardTitle {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.budgetBlock {
+  background: var(--accent-light);
+  padding: 28px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.budgetLabel {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.budgetValue {
+  font-size: 42px;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.budgetSource {
+  font-size: 13px;
+  color: var(--accent-text-strong);
+  margin-top: 12px;
+  line-height: 1.5;
+}
+
+.startBtn {
+  padding: 16px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.startBtn:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.startBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.error {
+  background: var(--error-bg);
+  color: var(--error-text);
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-size: 14px;
+  color: var(--text-muted);
+}

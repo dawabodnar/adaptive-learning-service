@@ -1,0 +1,14 @@
+# Розміщення: backend/.dockerignore
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.env
+.env.local
+.git/
+.gitignore
+.DS_Store
+tests/
+*.md
